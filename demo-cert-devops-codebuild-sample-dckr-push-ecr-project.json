@@ -1,0 +1,113 @@
+{
+    "name": "demo-cert-devops-codebuild-sample-dckr-push-ecr",
+    "arn": "arn:aws:codebuild:eu-central-1:311674589786:project/demo-cert-devops-codebuild-sample-dckr-push-ecr",
+    "description": "An AWS CodeBuild project that builds a Docker image that is then pushed to an Amazon Elastic Container Registry (Amazon ECR) image repository.",
+    "source": {
+        "type": "GITHUB",
+        "location": "https://github.com/cloudemprise/demo-cert-devops-codebuild-sample-dckr-push-ecr.git",
+        "gitCloneDepth": 1,
+        "gitSubmodulesConfig": {
+            "fetchSubmodules": false
+        },
+        "reportBuildStatus": true,
+        "insecureSsl": false
+    },
+    "secondarySources": [],
+    "secondarySourceVersions": [],
+    "artifacts": {
+        "type": "NO_ARTIFACTS"
+    },
+    "secondaryArtifacts": [],
+    "cache": {
+        "type": "NO_CACHE"
+    },
+    "environment": {
+        "type": "LINUX_CONTAINER",
+        "image": "aws/codebuild/standard:4.0",
+        "computeType": "BUILD_GENERAL1_SMALL",
+        "environmentVariables": [
+            {
+                "name": "AWS_DEFAULT_REGION",
+                "value": "eu-central-1",
+                "type": "PLAINTEXT"
+            },
+            {
+                "name": "AWS_ACCOUNT_ID",
+                "value": "311674589786",
+                "type": "PLAINTEXT"
+            },
+            {
+                "name": "IMAGE_TAG",
+                "value": "latest",
+                "type": "PLAINTEXT"
+            },
+            {
+                "name": "IMAGE_REPO_NAME",
+                "value": "demo-cert-devops/codebuild-sample/dckr-push-ecr",
+                "type": "PLAINTEXT"
+            }
+        ],
+        "privilegedMode": true,
+        "imagePullCredentialsType": "CODEBUILD"
+    },
+    "serviceRole": "arn:aws:iam::311674589786:role/service-role/demo-cert-devops-codebuild-sample-dckr-push-ecr-service-role",
+    "timeoutInMinutes": 15,
+    "queuedTimeoutInMinutes": 30,
+    "encryptionKey": "arn:aws:kms:eu-central-1:311674589786:alias/aws/s3",
+    "tags": [
+        {
+            "key": "Function",
+            "value": "cert-devops"
+        },
+        {
+            "key": "Project",
+            "value": "demo"
+        },
+        {
+            "key": "Reference",
+            "value": "manual"
+        }
+    ],
+    "created": "2022-01-08T07:13:52.368000+00:00",
+    "lastModified": "2022-01-09T12:10:26.120000+00:00",
+    "webhook": {
+        "url": "https://api.github.com/repos/cloudemprise/demo-cert-devops-codebuild-sample-dckr-push-ecr/hooks/337350947",
+        "payloadUrl": "https://codebuild.eu-central-1.amazonaws.com/webhooks?t=eyJlbmNyeXB0ZWREYXRhIjoiYU94OWxrV0dBRFAvZU5HeUxqUDR3VUJueGpkd1llRFlRbEJGUVBGNzhMUERpZVVJcWRtdGpBeFVNcG1UeVVEMFVmK1l5dFJNemlTUEZETi9qTjNJMk9rPSIsIml2UGFyYW1ldGVyU3BlYyI6InJ3SVJXa3pOZWVtZ25qcm8iLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&v=1",
+        "filterGroups": [
+            [
+                {
+                    "type": "EVENT",
+                    "pattern": "PUSH",
+                    "excludeMatchedPattern": false
+                },
+                {
+                    "type": "ACTOR_ACCOUNT_ID",
+                    "pattern": "55949963",
+                    "excludeMatchedPattern": false
+                },
+                {
+                    "type": "HEAD_REF",
+                    "pattern": "^refs/heads/main$",
+                    "excludeMatchedPattern": false
+                }
+            ]
+        ],
+        "buildType": "BUILD"
+    },
+    "badge": {
+        "badgeEnabled": true,
+        "badgeRequestUrl": "https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoidnJHL1VaWmxQZmZDZWx6NGtZWFBqTlhIZnlHOHJjUCtkOWRtOFU5b29ORUpmSStRWFNxMWdrZnY3L2NTb3VDelNXbUR2MHFVaTQzeHBVczE5VFdSUmEwPSIsIml2UGFyYW1ldGVyU3BlYyI6IkZodDF2Vks0alJjVlR3ZFUiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=main"
+    },
+    "logsConfig": {
+        "cloudWatchLogs": {
+            "status": "ENABLED",
+            "groupName": "/demo-cert-devops/codebuild",
+            "streamName": "sample-dckr-push-ecr"
+        },
+        "s3Logs": {
+            "status": "ENABLED",
+            "location": "demo-cert-devops/codebuild/sample-dckr-push-ecr",
+            "encryptionDisabled": false
+        }
+    }
+}

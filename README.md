@@ -24,7 +24,7 @@ For a particular build project, it is convenient to automatically create an AWS 
 
 `Allow AWS CodeBuild to modify this service role so it can be used with this build project` 
 
-This produces a policy of least-privilege but in this particular case, in order to push an image to an Amazon ECR repository the AWS CodeBuild service role will need extra authorizations to do so. This is simply achieved by way of an inline policy statement manually attached to the automatically created policy, giving the AWS CodeBuild service the necessary permissions to do so. An example of this inline policy is included here for reference.
+This produces a policy of least-privilege but in this particular case, in order to push an image to an Amazon ECR repository the AWS CodeBuild service role will need extra authorizations to do so. This is simply achieved by way of an inline policy statement manually attached to the automatically created policy giving the AWS CodeBuild service the necessary permissions to do so. An example of this inline policy is included here for reference.
 
 &nbsp;
 
@@ -70,6 +70,7 @@ Use the AWS CLI:
 - This sample was tested referencing golang:1.12.
 - The CodeBuild project environment must be configured in Privileged Mode.
 - A bash script has been included to reconfigure the git remotes to push to multiple git repositories, i.e. to GitHub and AWS CodeCommit.
+- Also, documented here is a bash script highlighting useful API calls that relate to the AWS CodeBuild service in connection with this exercise as well as an AWS CloudFormation infrastructure template declaring all the important AWS resources.
 
 ---
 

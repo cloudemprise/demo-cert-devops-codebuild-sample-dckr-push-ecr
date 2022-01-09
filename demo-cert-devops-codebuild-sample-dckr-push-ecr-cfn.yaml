@@ -1,0 +1,250 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  Generator: "former2"
+Description: ""
+Resources:
+
+  ECRRepository:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: !Sub "${S3Bucket}/codebuild-sample/dckr-push-ecr"
+      LifecyclePolicy: 
+        RegistryId: "311674589786"
+
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "demo-cert-devops"
+      Tags: 
+      - 
+        Key: "Function"
+        Value: "cert-devops"
+      - 
+        Key: "Project"
+        Value: "demo"
+      - 
+        Key: "Reference"
+        Value: "manual"
+      BucketEncryption: 
+        ServerSideEncryptionConfiguration: 
+        - 
+          ServerSideEncryptionByDefault: 
+            SSEAlgorithm: "AES256"
+          BucketKeyEnabled: false
+
+  CodeCommitRepository:
+    Type: "AWS::CodeCommit::Repository"
+    Properties:
+      RepositoryDescription: "The repository contains artifacts and reference material related to an AWS CodeBuild build project and its auxiliary components. These components build a Docker image that is then pushed to an Amazon Elastic Container Registry (Amazon ECR) image repository."
+      RepositoryName: !Sub "${S3Bucket}-codebuild-sample-dckr-push-ecr"
+
+  CodeBuildProject:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub "${S3Bucket}-codebuild-sample-dckr-push-ecr"
+      Description: "An AWS CodeBuild project that builds a Docker image that is then pushed to an Amazon Elastic Container Registry (Amazon ECR) image repository."
+      Source: 
+        GitCloneDepth: 1
+        GitSubmodulesConfig: 
+          FetchSubmodules: false
+        InsecureSsl: false
+        Location: !Sub "https://github.com/cloudemprise/${S3Bucket}-codebuild-sample-dckr-push-ecr.git"
+        ReportBuildStatus: true
+        Type: "GITHUB"
+      Artifacts: 
+        Type: "NO_ARTIFACTS"
+      Cache: 
+        Type: "NO_CACHE"
+      Environment: 
+        ComputeType: "BUILD_GENERAL1_SMALL"
+        EnvironmentVariables: 
+        - 
+          Name: "AWS_DEFAULT_REGION"
+          Type: "PLAINTEXT"
+          Value: !Ref AWS::Region
+        - 
+          Name: "AWS_ACCOUNT_ID"
+          Type: "PLAINTEXT"
+          Value: "311674589786"
+        - 
+          Name: "IMAGE_TAG"
+          Type: "PLAINTEXT"
+          Value: "latest"
+        - 
+          Name: "IMAGE_REPO_NAME"
+          Type: "PLAINTEXT"
+          Value: !Sub "${S3Bucket}/codebuild-sample/dckr-push-ecr"
+        Image: "aws/codebuild/standard:4.0"
+        ImagePullCredentialsType: "CODEBUILD"
+        PrivilegedMode: true
+        Type: "LINUX_CONTAINER"
+      ServiceRole: !GetAtt IAMRole.Arn
+      TimeoutInMinutes: 15
+      QueuedTimeoutInMinutes: 30
+      EncryptionKey: !Sub "arn:aws:kms:${AWS::Region}:311674589786:alias/aws/s3"
+      Tags: 
+      - 
+        Key: "Function"
+        Value: "cert-devops"
+      - 
+        Key: "Project"
+        Value: "demo"
+      - 
+        Key: "Reference"
+        Value: "manual"
+      BadgeEnabled: true
+      LogsConfig: 
+        CloudWatchLogs: 
+          Status: "ENABLED"
+          GroupName: !Sub "/${S3Bucket}/codebuild"
+          StreamName: "sample-dckr-push-ecr"
+        S3Logs: 
+          Status: "ENABLED"
+          Location: !Sub "${S3Bucket}/codebuild/sample-dckr-push-ecr"
+          EncryptionDisabled: false
+      Visibility: "PRIVATE"
+
+  CodeStarNotificationsNotificationRule:
+    Type: "AWS::CodeStarNotifications::NotificationRule"
+    Properties:
+      DetailType: "BASIC"
+      EventTypeIds: 
+      - "codebuild-project-build-state-succeeded"
+      - "codebuild-project-build-state-failed"
+      Name: !Sub "${S3Bucket}-codebuild-sample-dckr-push-ecr-codestar"
+      Resource: !Sub "arn:aws:codebuild:${AWS::Region}:311674589786:project/${S3Bucket}-codebuild-sample-dckr-push-ecr"
+      Status: "ENABLED"
+      Targets: 
+      - 
+        TargetAddress: !Sub "arn:aws:sns:${AWS::Region}:311674589786:codestar-notifications-${S3Bucket}-codebuild-sample-dckr-push-ecr"
+        TargetType: "SNS"
+      Tags: {}
+
+  LogsLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Sub "/${S3Bucket}/codebuild"
+
+  IAMPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyDocument: |
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Sid": "AllowCodeBuildUploadDockerImageToECR",
+                      "Effect": "Allow",
+                      "Action": [
+                          "ecr:CompleteLayerUpload",
+                          "ecr:GetAuthorizationToken",
+                          "ecr:UploadLayerPart",
+                          "ecr:InitiateLayerUpload",
+                          "ecr:BatchCheckLayerAvailability",
+                          "ecr:PutImage"
+                      ],
+                      "Resource": "*"
+                  }
+              ]
+          }
+      Roles: 
+      - !Ref IAMRole
+      PolicyName: !Sub "${S3Bucket}-codebuild-sample-dckr-push-ecr"
+
+  IAMManagedPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "CodeBuildBasePolicy-${S3Bucket}-codebuild-sample-dckr-push-ecr-${AWS::Region}"
+      Path: "/service-role/"
+      PolicyDocument: !Sub |
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:logs:${AWS::Region}:311674589786:log-group:/aws/codebuild/${S3Bucket}-codebuild-sample-dckr-push-ecr",
+                          "arn:aws:logs:${AWS::Region}:311674589786:log-group:/aws/codebuild/${S3Bucket}-codebuild-sample-dckr-push-ecr:*"
+                      ],
+                      "Action": [
+                          "logs:CreateLogGroup",
+                          "logs:CreateLogStream",
+                          "logs:PutLogEvents"
+                      ]
+                  },
+                  {
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::codepipeline-${AWS::Region}-*"
+                      ],
+                      "Action": [
+                          "s3:PutObject",
+                          "s3:GetObject",
+                          "s3:GetObjectVersion",
+                          "s3:GetBucketAcl",
+                          "s3:GetBucketLocation"
+                      ]
+                  },
+                  {
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:s3:::${S3Bucket}",
+                          "arn:aws:s3:::${S3Bucket}/*"
+                      ],
+                      "Action": [
+                          "s3:PutObject",
+                          "s3:GetBucketAcl",
+                          "s3:GetBucketLocation"
+                      ]
+                  },
+                  {
+                      "Effect": "Allow",
+                      "Action": [
+                          "codebuild:CreateReportGroup",
+                          "codebuild:CreateReport",
+                          "codebuild:UpdateReport",
+                          "codebuild:BatchPutTestCases",
+                          "codebuild:BatchPutCodeCoverages"
+                      ],
+                      "Resource": [
+                          "arn:aws:codebuild:${AWS::Region}:311674589786:report-group/${S3Bucket}-codebuild-sample-dckr-push-ecr-*"
+                      ]
+                  }
+              ]
+          }
+
+  IAMManagedPolicy2:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "CodeBuildCloudWatchLogsPolicy-${S3Bucket}-codebuild-sample-dckr-push-ecr-${AWS::Region}"
+      Path: "/service-role/"
+      PolicyDocument: !Sub |
+          {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Resource": [
+                          "arn:aws:logs:${AWS::Region}:311674589786:log-group:/${S3Bucket}/codebuild",
+                          "arn:aws:logs:${AWS::Region}:311674589786:log-group:/${S3Bucket}/codebuild:*"
+                      ],
+                      "Action": [
+                          "logs:CreateLogGroup",
+                          "logs:CreateLogStream",
+                          "logs:PutLogEvents"
+                      ]
+                  }
+              ]
+          }
+
+  IAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/service-role/"
+      RoleName: !Sub "${S3Bucket}-codebuild-sample-dckr-push-ecr-service-role"
+      AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"codebuild.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns: 
+      - !Ref IAMManagedPolicy2
+      - !Ref IAMManagedPolicy
+

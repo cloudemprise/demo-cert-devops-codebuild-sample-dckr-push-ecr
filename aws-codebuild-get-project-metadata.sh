@@ -1,8 +1,7 @@
 #!/bin/bash -e
 # debug options include -v -x
-# sync-git-remotes-multiple-repos
-# A script to reconfigure the git remotes to push to multiple git repositories, i.e.
-# to GitHub and AWS CodeCommit.
+# aws-codebuild-get-project-metadata.sh
+# A script to get the meta data regarding the build project.
 
 #-----------------------------
 # Request Named Profile
@@ -35,8 +34,7 @@ do
   # -p : prompt on stderr
   # -i : use default buffer val
   read -er -i "$AWS_REGION" -p "Enter Project AWS CLI Region ..................: " USER_INPUT
-  if aws ec2 describe-regions --profile "$AWS_PROFILE" --query 'Regions[].RegionName' \
-    --output text 2>/dev/null | grep -qw -- "$USER_INPUT"
+  if aws ec2 describe-regions --profile "$AWS_PROFILE" --query 'Regions[].RegionName' --output text 2>/dev/null | grep -qw -- "$USER_INPUT"
   then
     echo "Project AWS CLI Region is valid ...............: $USER_INPUT"
     AWS_REGION=$USER_INPUT
@@ -71,49 +69,12 @@ done
 #.............................
 
 #-----------------------------
-# Request ECR description
-REPO_DESCRIPTION=\
-"The repository contains artifacts and reference material related to an AWS CodeBuild build \
-project and its auxiliary components. These components build a Docker image that is then pushed \
-to an Amazon Elastic Container Registry (Amazon ECR) image repository."
-while true
-do
-  # -e : stdin from terminal
-  # -r : backslash not an escape character
-  # -p : prompt on stderr
-  # -i : use default buffer val
-  read -er -i "$REPO_DESCRIPTION" -p "Enter the description here ....................: " USER_INPUT
-  if [[ "${USER_INPUT:=$REPO_DESCRIPTION}" =~ (^[a-zA-Z0-9(). -]*$) ]]
-  then
-    echo "Check Valid Comment ...........................: PASS"
-    REPO_DESCRIPTION=$USER_INPUT
-    break
-  else
-    echo "Check Valid Comment ...........................: FAIL"
-  fi
-done
-#.............................
-
-
-#-----------------------------
-# Create a mirror repository in AWS CodeCommit and configure to push origin.
-REPO_GIT=$(git config --get remote.origin.url)
-
-
-REPO_NAME=$(echo "$REPO_GIT" | grep -o -P '(?<=git@github.com:cloudemprise/).*(?=.git)')
-
-git remote rm origin
-
-git remote add origin "$REPO_GIT"
-
-git remote set-url --add --push origin "$REPO_GIT"
-
-REPO_AWS=$(aws codecommit create-repository --repository-name "$REPO_NAME" --output text \
-  --repository-description "$REPO_DESCRIPTION" --query "repositoryMetadata.cloneUrlSsh"  \
-  --tags Function="cert-devops",Project="demo",Reference="script")
-
-git remote set-url --add --push origin "$REPO_AWS"
-
-git push --set-upstream origin main
-#.............................
-
+# Get Build Project Meta Data
+if (aws codebuild batch-get-projects --name "$PROJECT_NAME" --output json --profile "$AWS_PROFILE" \
+  --region "$AWS_REGION" --query projects[0] > "${PROJECT_NAME}-project.json")
+then 
+  echo "Getting Build Project Information Successful ...: ${PROJECT_NAME}-project.json"
+else 
+  echo "Getting Build Project Information Failed ......: ${PROJECT_NAME}-project.json"
+  exit 1
+fi
