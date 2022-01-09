@@ -1,7 +1,8 @@
 #!/bin/bash -e
 # debug options include -v -x
-# demo-cert-devops-codebuild-sample-dckr-dind-project.sh
-# A script to get the meta data regarding the build project.
+# sync-git-remotes-multiple-repos
+# A script to reconfigure the git remotes to push to multiple git repositories, i.e.
+# to GitHub and AWS CodeCommit.
 
 #-----------------------------
 # Request Named Profile
