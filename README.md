@@ -8,11 +8,17 @@
 
 #### Overview
 
+&nbsp;
+
 The repository contains artifacts and reference material related to an AWS CodeBuild build project and its auxiliary components. These components build and track a Docker image that is then pushed to an Amazon Elastic Container Registry (Amazon ECR) image repository.
+
+&nbsp;
 
 #### Multi-Stage Docker Build Feature
 
 This build architecture makes use of the Multi-Stage Docker Build Feature, which produces an optimized Docker Image, efficiently building small images which improves the developer experience tremendously.
+
+&nbsp;
 
 #### AWS CodeBuild service role
 
@@ -21,6 +27,8 @@ For a particular build project, it is convenient to automatically create an AWS 
 `Allow AWS CodeBuild to modify this service role so it can be used with this build project` 
 
 This produces a policy of least-privilege but in this particular case, in order to push an image to an Amazon ECR repository the AWS CodeBuild service role will need extra authorizations to do so. This is simply achieved by way of an inline policy statement manually attached to the automatically created policy, giving the AWS CodeBuild service the necessary permissions to do so. An example of this inline policy is included here for reference.
+
+&nbsp;
 
 #### AWS CodeBuild Environment Variables
 
@@ -33,6 +41,8 @@ Pushing a Docker image to an Amazon ECR repository from AWS CodeBuild also requi
 `IMAGE_TAG = latest`
 
 `IMAGE_REPO_NAME = Amazon-ECR-repo-name`
+
+&nbsp;
 
 #### Amazon ECR Private Repository
 ##### demo-cert-devops/codebuild-sample/dckr-push-ecr
@@ -54,6 +64,8 @@ Use the AWS CLI:
 3. After the build completes, tag your image so you can push the image to this repository:
 
 `docker tag demo-cert-devops/codebuild-sample/dckr-push-ecr:latest 311674589786.dkr.ecr.eu-central-1.amazonaws.com/demo-cert-devops/codebuild-sample/dckr-push-ecr:latest`
+
+&nbsp;
 
 #### Note: 
 
