@@ -8,8 +8,6 @@
 
 #### Overview
 
-&nbsp;
-
 The repository contains artifacts and reference material related to an AWS CodeBuild build project and its auxiliary components. These components build and track a Docker image that is then pushed to an Amazon Elastic Container Registry (Amazon ECR) image repository.
 
 &nbsp;
