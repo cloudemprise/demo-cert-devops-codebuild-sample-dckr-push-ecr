@@ -35,7 +35,7 @@ Pushing a Docker image to an Amazon ECR repository from AWS CodeBuild also requi
 `IMAGE_REPO_NAME = Amazon-ECR-repo-name`
 
 #### Amazon ECR Private Repository
-> ##### demo-cert-devops/codebuild-sample/dckr-push-ecr
+##### demo-cert-devops/codebuild-sample/dckr-push-ecr
 
 ###### Push commands:
 
