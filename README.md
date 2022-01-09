@@ -61,29 +61,25 @@ Use the AWS CLI:
 - The CodeBuild project environment must be configured in Privileged Mode.
 - A bash script has been included to reconfigure the git remotes to push to multiple git repositories, i.e. to GitHub and AWS CodeCommit.
 
-&nbsp;
-
 ---
 
-&nbsp;
-
-**Reference:**
+#### Reference:
 
 - AWS CodeBuild - [Docker sample for CodeBuild](https://docs.aws.amazon.com/codebuild/latest/userguide/sample-docker.html)
 
-- DockerHub - [Use multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/)
+- AWS CodeBuild - [Environment variables in build environments ](https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html)
 
 - AWS ECR - [Creating a private repository](https://docs.aws.amazon.com/AmazonECR/latest/userguide/repository-create.html)
+
+- Docker CLI - [Runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+
+- DockerHub - [Use multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/)
 
 - AWS ECR - [Image scanning](https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html)
 
 - Clair - [Open Source Application Container Vulnerabilities Scanner](https://github.com/quay/clair)
 
-- Docker CLI - [Runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
-
 - Blog Post - [Builder pattern vs. Multi-stage builds in Docker](https://blog.alexellis.io/mutli-stage-docker-builds/)
-
-- AWS CodeBuild - [Environment variables in build environments ](https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html)
 
 &nbsp;
 
