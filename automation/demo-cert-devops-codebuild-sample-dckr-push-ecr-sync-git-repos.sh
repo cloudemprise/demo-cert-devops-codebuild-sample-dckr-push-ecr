@@ -1,8 +1,8 @@
 #!/bin/bash -e
 # debug options include -v -x
-# sync-git-remotes-multiple-repos
-# A script to reconfigure the git remotes to push to multiple git repositories, i.e.
-# to GitHub and AWS CodeCommit.
+# demo-cert-devops-codebuild-sample-dckr-push-ecr-sync-git-repos.sh
+# sync to multiple git remotes, namely: github & codecommit
+# A script to reconfigure the git remotes to push to multiple git repositories.
 
 #-----------------------------
 # Request Named Profile
@@ -73,9 +73,10 @@ done
 #-----------------------------
 # Request ECR description
 REPO_DESCRIPTION=\
-"The repository contains artifacts and reference material related to an AWS CodeBuild build \
-project and its auxiliary components. These components build a Docker image that is then pushed \
-to an Amazon Elastic Container Registry (Amazon ECR) image repository."
+"The repository contains artifacts and reference material related to an AWS \
+CodeBuild build project and its auxiliary components. These components build \
+and track a Docker image that is then pushed to an Amazon Elastic Container \
+Registry (Amazon ECR) image repository."
 while true
 do
   # -e : stdin from terminal
@@ -83,7 +84,7 @@ do
   # -p : prompt on stderr
   # -i : use default buffer val
   read -er -i "$REPO_DESCRIPTION" -p "Enter the description here ....................: " USER_INPUT
-  if [[ "${USER_INPUT:=$REPO_DESCRIPTION}" =~ (^[a-zA-Z0-9(). -]*$) ]]
+  if [[ "${USER_INPUT:=$REPO_DESCRIPTION}" =~ (^[a-zA-Z0-9(). -:\']*$) ]]
   then
     echo "Check Valid Comment ...........................: PASS"
     REPO_DESCRIPTION=$USER_INPUT
@@ -97,10 +98,15 @@ done
 
 #-----------------------------
 # Create a mirror repository in AWS CodeCommit and configure to push origin.
+cd ..
 REPO_GIT=$(git config --get remote.origin.url)
+
+#echo "REPO_GIT: $REPO_GIT"
 
 
 REPO_NAME=$(echo "$REPO_GIT" | grep -o -P '(?<=git@github.com:cloudemprise/).*(?=.git)')
+
+#echo "REPO_NAME: $REPO_NAME"
 
 git remote rm origin
 
@@ -108,9 +114,13 @@ git remote add origin "$REPO_GIT"
 
 git remote set-url --add --push origin "$REPO_GIT"
 
-REPO_AWS=$(aws codecommit create-repository --repository-name "$REPO_NAME" --output text \
-  --repository-description "$REPO_DESCRIPTION" --query "repositoryMetadata.cloneUrlSsh"  \
-  --tags Function="cert-devops",Project="demo",Reference="script")
+REPO_AWS=$(aws codecommit create-repository --repository-name "$REPO_NAME" \
+  --output text --profile "$AWS_PROFILE" --region "$AWS_REGION" \
+  --repository-description "$REPO_DESCRIPTION" \
+  --query "repositoryMetadata.cloneUrlSsh"  \
+  --tags Function="maintenance",Project="setup",Reference="script")
+
+#echo "REPO_AWS: $REPO_AWS"
 
 git remote set-url --add --push origin "$REPO_AWS"
 
